@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
-import {Group, Line, Text, Rect} from 'react-konva'
+import {Group, Line} from 'react-konva'
 
+import Droplet from './Droplet'
+import Bullet from './Bullet'
 import {game} from './data'
 import {bublePop, fly} from './move'
 
@@ -14,28 +16,6 @@ const MyLine = ({points, color, width}) => {
       lineJoin="round"
     />
   )
-}
-
-const MyText = ({id, boardSize, board, cellSize}) => {
-  const row = Math.floor((id - 1) / boardSize)
-  const col = (id - 1) % boardSize
-
-  return (
-    <Text
-      x={cellSize * col + cellSize / 2}
-      y={cellSize * row + cellSize / 2}
-      text={board[row][col]}
-      fontSize={30}
-      fill='blue'
-    />
-  )
-}
-
-const sleep = (miliseconds) => {
-  const currentTime = new Date().getTime();
-
-  while (currentTime + miliseconds >= new Date().getTime()) {
-  }
 }
 
 export default class Board extends Component {
@@ -56,19 +36,14 @@ export default class Board extends Component {
     }
   }
 
-  onMouseDown = (e) => {
-    const cellSize = this.state.windowSize / this.state.size
+  onDropletClick = (row, col) => {
+    const board = this.state.board
+    const queue = this.state.queue
 
-    const x = Math.floor(e.evt.x / cellSize)
-    const y = Math.floor(e.evt.y / cellSize)
+    board[row][col] += 1
 
-    let board = this.state.board
-    let queue = this.state.queue
-
-    board[y][x] += 1
-
-    if (board[y][x] > 4) {
-      bublePop(board, queue, y, x)
+    if (board[row][col] > 4) {
+      bublePop(board, queue, row, col)
     }
 
     this.setState({board, queue})
@@ -76,46 +51,61 @@ export default class Board extends Component {
     setInterval(this.tick, 1000)
   }
 
-  render () {
+  render() {
     const cellSize = this.state.windowSize / this.state.size
     const array = [...Array(this.state.size + 1).keys()]
-    const data = Array(this.state.size).fill(Array(this.state.size).fill(0))
 
     return (
       <Group>
         {array.map(idx =>
-        <MyLine key={idx}
-          points={[0, idx * cellSize, this.state.windowSize, idx * cellSize]}
-          color="black"
-          width={5}
-        />
+          <MyLine key={idx}
+            points={[0, idx * cellSize, this.state.windowSize, idx * cellSize]}
+            color="black"
+            width={5}
+          />
         )}
 
         {array.map(idx =>
-        <MyLine key={idx}
-          points={[idx * cellSize, 0, idx * cellSize, this.state.windowSize]}
-          color="black"
-          width={5}
-        />
+          <MyLine key={idx}
+            points={[idx * cellSize, 0, idx * cellSize, this.state.windowSize]}
+            color="black"
+            width={5}
+          />
         )}
 
-        {data.map((e, i) => (e.map((e1, i1) => (
-          <MyText 
-            id={i * this.state.size + i1 + 1}
+        {this.renderDroplets(cellSize)}
+
+        {/*{this.state.queue.map((e, i) => (
+          <Bullet 
+            id={i}
             boardSize={this.state.size}
-            board={this.state.board}
+            queue={this.state.queue}
             cellSize={cellSize}
           />
-        ))))}
-
-        <Rect
-          x={0}
-          y={0}
-          width={this.state.windowSize}
-          height={this.state.windowSize}
-          onMouseDown={this.onMouseDown}
-        />
+        ))}*/}
       </Group>
     )
+  }
+
+  renderDroplets(cellSize) {
+    const ret = []
+
+    for (let row = 0; row < this.state.size; row++) {
+      for (let col = 0; col < this.state.size; col++) {
+        if (this.state.board[row][col] > 0) {
+          ret.push(
+            <Droplet 
+              key={`${row}-${col}`}
+              row={row}
+              col={col}
+              cellSize={cellSize}
+              onClick={this.onDropletClick.bind(this)}
+            />
+          )
+        }
+      }
+    }
+
+    return ret          
   }
 }
