@@ -18,6 +18,11 @@ const MyLine = ({points, color, width}) => {
   )
 }
 
+const boardEmpty = (board => {
+  const array = board.reduce((a, b) => { return a.concat(b) })
+  return array.reduce((a, b) => { return a + b }) === 0
+})
+
 export default class Board extends Component {
   state = {
     windowSize: Math.min(window.innerWidth, window.innerHeight),
@@ -30,9 +35,12 @@ export default class Board extends Component {
     let board = this.state.board
     let queue = this.state.queue
 
-    if (queue.length > 0) {
-      fly(board, queue)
-      this.setState({board, queue})
+    this.setState({queue: []})
+    fly(board, queue)
+    this.setState({board, queue})
+
+    if (boardEmpty(this.state.board)) {
+    alert("Congratulation!")
     }
   }
 
@@ -55,6 +63,8 @@ export default class Board extends Component {
     const cellSize = this.state.windowSize / this.state.size
     const array = [...Array(this.state.size + 1).keys()]
 
+    console.log(this.state.queue)
+
     return (
       <Group>
         {array.map(idx =>
@@ -75,14 +85,7 @@ export default class Board extends Component {
 
         {this.renderDroplets(cellSize)}
 
-        {/*{this.state.queue.map((e, i) => (
-          <Bullet 
-            id={i}
-            boardSize={this.state.size}
-            queue={this.state.queue}
-            cellSize={cellSize}
-          />
-        ))}*/}
+        {this.renderBullets(cellSize)}
       </Group>
     )
   }
@@ -106,6 +109,27 @@ export default class Board extends Component {
       }
     }
 
-    return ret          
+    return ret         
+  }
+
+  renderBullets(cellSize) {
+    const ret =[]
+
+    for (let i = 0; i < this.state.queue.length; i++) {
+      const e = this.state.queue[i]
+
+      ret.push(
+        <Bullet 
+          key={i}
+          row={e.row}
+          col={e.col}
+          direction={e.direction}
+          direction={e.direction}
+          cellSize={cellSize}
+        />
+      )
+    }
+
+    return ret;
   }
 }
