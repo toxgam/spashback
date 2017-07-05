@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import {Group, Line} from 'react-konva'
 
 import Droplet from './Droplet'
-import Bullet from './Bullet'
 import {game} from './data'
 import {bublePop, fly} from './move'
 
@@ -23,47 +22,76 @@ const boardEmpty = (board => {
   return array.reduce((a, b) => { return a + b }) === 0
 })
 
+const reset = (changed => {
+  for (let i = 0; i < changed.length; i++) {
+    for (let j = 0; j < changed[i].length; j++) {
+      changed[i][j] = false
+    }
+  }
+})
+
+const noChange = (changed => {
+  changed.reduce((ret, e) => {return ret || e.reduce((ret,f) => {return ret || f}, false)}, false)
+})
+
 export default class Board extends Component {
   state = {
     windowSize: Math.min(window.innerWidth, window.innerHeight),
     size: game.size,
     board: game.board,
-    queue: []
-  }
-
-  tick = () => {
-    let board = this.state.board
-    let queue = this.state.queue
-
-    this.setState({queue: []})
-    fly(board, queue)
-    this.setState({board, queue})
-
-    if (boardEmpty(this.state.board)) {
-    alert("Congratulation!")
-    }
+    queue: [],
+    changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
+    generation: undefined
   }
 
   onDropletClick = (row, col) => {
     const board = this.state.board
     const queue = this.state.queue
+    const changed = this.state.changed
 
     board[row][col] += 1
+    changed[row][col] = true
 
     if (board[row][col] > 4) {
       bublePop(board, queue, row, col)
     }
 
-    this.setState({board, queue})
+    const loop = (maxGeneration, loopCount, generationCount, onDone) => {
+      if (generationCount < 0) {
+        loopCount -= 1
+        generationCount = maxGeneration
+      }
 
-    setInterval(this.tick, 1000)
+      if (loopCount < 0) {
+        onDone()
+        return
+      }
+      
+      this.setState({board, queue, changed, generation: generationCount})
+      setTimeout(loop.bind(this, maxGeneration, loopCount, generationCount - 1, onDone), 5)
+    }
+
+    const onDone = () => {
+      reset(changed)
+      fly(board, queue, changed)
+
+      if (queue.length > 0 && !noChange(changed)) {
+        start()
+      }
+    }
+
+    const start = () => {
+      loop(5, 2, 5, onDone.bind(this))
+    }
+
+    start()
   }
+
+  
 
   render() {
     const cellSize = this.state.windowSize / this.state.size
     const array = [...Array(this.state.size + 1).keys()]
-
-    console.log(this.state.queue)
 
     return (
       <Group>
@@ -85,7 +113,6 @@ export default class Board extends Component {
 
         {this.renderDroplets(cellSize)}
 
-        {this.renderBullets(cellSize)}
       </Group>
     )
   }
@@ -95,41 +122,20 @@ export default class Board extends Component {
 
     for (let row = 0; row < this.state.size; row++) {
       for (let col = 0; col < this.state.size; col++) {
-        if (this.state.board[row][col] > 0) {
-          ret.push(
-            <Droplet 
-              key={`${row}-${col}`}
-              row={row}
-              col={col}
-              cellSize={cellSize}
-              onClick={this.onDropletClick.bind(this)}
-            />
-          )
-        }
+        ret.push(
+          <Droplet 
+            key={`${row}-${col}`}
+            row={row}
+            col={col}
+            value={this.state.board[row][col]}
+            gen={this.state.changed[row][col] ? this.state.generation : undefined}
+            cellSize={cellSize}
+            onClick={this.onDropletClick.bind(this)}
+          />
+        )
       }
     }
 
     return ret         
-  }
-
-  renderBullets(cellSize) {
-    const ret =[]
-
-    for (let i = 0; i < this.state.queue.length; i++) {
-      const e = this.state.queue[i]
-
-      ret.push(
-        <Bullet 
-          key={i}
-          row={e.row}
-          col={e.col}
-          direction={e.direction}
-          direction={e.direction}
-          cellSize={cellSize}
-        />
-      )
-    }
-
-    return ret;
   }
 }

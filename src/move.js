@@ -8,7 +8,7 @@ export const bublePop = (board, queue, y, x) => {
   }
 }
 
-export const fly = (board, thisQueue) => {
+export const fly = (board, thisQueue, changed) => {
   let queue = []
   const size = board.length
 
@@ -21,6 +21,8 @@ export const fly = (board, thisQueue) => {
         queue.push({row: row, col: col, direction: e.direction})
       } else {
         board[row][col] += 1
+        changed[row][col] = true
+
         if (board[row][col] > 4) {
             bublePop(board, queue, row, col)
         }
