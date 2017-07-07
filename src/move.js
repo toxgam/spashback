@@ -1,5 +1,10 @@
 import {directions} from './data'
 
+export const boardEmpty = (board => {
+  const array = board.reduce((a, b) => { return a.concat(b) })
+  return array.reduce((a, b) => { return a + b }) === 0
+})
+
 export const bublePop = (board, queue, y, x) => {
   board[y][x] = 0
 

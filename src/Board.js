@@ -4,7 +4,8 @@ import {Group, Line, Text} from 'react-konva'
 import Droplet from './Droplet'
 import Bullet from './Bullet'
 import {game} from './data'
-import {bublePop, fly} from './move'
+import {bublePop, fly, boardEmpty} from './move'
+import {gameBoard} from './boardGen'
 
 const MyLine = ({points, color, width}) => {
   return (
@@ -17,11 +18,6 @@ const MyLine = ({points, color, width}) => {
     />
   )
 }
-
-const boardEmpty = (board => {
-  const array = board.reduce((a, b) => { return a.concat(b) })
-  return array.reduce((a, b) => { return a + b }) === 0
-})
 
 const reset = (changed => {
   for (let i = 0; i < changed.length; i++) {
@@ -48,14 +44,14 @@ export default class Board extends Component {
     }
 
     this.level = parseInt(localStorage.level)
-    this.score = parseInt(localStorage.score)
+    this.move = parseInt(localStorage.score)
 
     if (this.level > 1) {
       this.level = 1
     }
 
     this.state = {
-      board: game.board[this.level],
+      board: gameBoard(this.level, this.move),
       queue: [],
       changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
       generation: undefined,
@@ -71,7 +67,7 @@ export default class Board extends Component {
     const queue = this.state.queue
     const changed = this.state.changed
 
-    this.score--
+    this.move--
 
     board[row][col] += 1
     changed[row][col] = true
@@ -104,7 +100,7 @@ export default class Board extends Component {
     const onDone = () => {
       reset(changed)
       if (fly(board, queue, changed) >= 2) {
-        this.score++
+        this.move++
       }
 
       if (queue.length > 0 && !noChange(changed)) {
@@ -114,9 +110,9 @@ export default class Board extends Component {
         if (boardEmpty(this.state.board)) {
           alert(`level ${this.level + 1} completed`)
           localStorage.level = this.level + 1
-          localStorage.score = this.score
+          localStorage.score = this.move
           window.location = window.location
-        } else if (this.score <= 0) {
+        } else if (this.move <= 0) {
           alert("You lose")
           localStorage.removeItem("level")
           localStorage.removeItem("score")
@@ -139,7 +135,7 @@ export default class Board extends Component {
 
     return (
       <Group>
-        <Text text={"Droplet: " + this.score} align="left" padding={10} />
+        <Text text={"Move: " + this.move} align="left" padding={10} />
         <Text text={"Score: " + (this.level + 1)} width={displaySize} align="right" padding={10} />
         <Group x={this.windowSize  * 0.1} y={this.windowSize * 0.1}>
           {array.map(idx =>
