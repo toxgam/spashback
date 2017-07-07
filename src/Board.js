@@ -42,14 +42,18 @@ export default class Board extends Component {
   constructor(props) {
     super(props)
 
-    if (localStorage.level === undefined) {
+    if (localStorage.getItem("level") === null) {
       localStorage.level = 0
+      localStorage.score = 5
     }
+
+    this.level = parseInt(localStorage.level)
+    this.score = parseInt(localStorage.score)
 
     this.state = {
       windowSize: Math.min(window.innerWidth, window.innerHeight),
       size: game.size,
-      board: game.board[localStorage.level],
+      board: game.board[this.level],
       queue: [],
       changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
       generation: undefined,
@@ -61,6 +65,8 @@ export default class Board extends Component {
     const board = this.state.board
     const queue = this.state.queue
     const changed = this.state.changed
+
+    this.score--
 
     board[row][col] += 1
     changed[row][col] = true
@@ -86,15 +92,23 @@ export default class Board extends Component {
 
     const onDone = () => {
       reset(changed)
-      fly(board, queue, changed)
+      if (fly(board, queue, changed) >= 2) {
+        this.score++
+      }
 
       if (queue.length > 0 && !noChange(changed)) {
         start()
       } else {
         this.setState({board, queue})
         if (boardEmpty(this.state.board)) {
-          console.log(`level ${this.state.level} completed`)
-          localStorage.level++
+          alert(`level ${this.level + 1} completed`)
+          localStorage.level = this.level + 1
+          localStorage.score = this.score
+          window.location = window.location
+        } else if (this.score <= 0) {
+          alert("You lose")
+          localStorage.removeItem("level")
+          localStorage.removeItem("score")
           window.location = window.location
         }
       }

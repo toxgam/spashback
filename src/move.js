@@ -12,6 +12,8 @@ export const fly = (board, thisQueue, changed) => {
   let queue = []
   const size = board.length
 
+  let combo = 0
+
   thisQueue.forEach(e => {
     const col = e.col + directions[e.direction][0]
     const row = e.row + directions[e.direction][1]
@@ -24,10 +26,13 @@ export const fly = (board, thisQueue, changed) => {
         changed[row][col] = true
 
         if (board[row][col] > 4) {
-            bublePop(board, queue, row, col)
+          bublePop(board, queue, row, col)
+          combo++
         }
       }
     }
+
+    return combo
   })
 
   thisQueue.length = 0
