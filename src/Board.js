@@ -35,15 +35,26 @@ const noChange = (changed => {
   changed.reduce((ret, e) => {return ret || e.reduce((ret,f) => {return ret || f}, false)}, false)
 })
 
+const genNum = 6
+const loopNum = 0
+
 export default class Board extends Component {
-  state = {
-    windowSize: Math.min(window.innerWidth, window.innerHeight),
-    size: game.size,
-    board: game.board,
-    queue: [],
-    changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
-    generation: undefined,
-    loopCount: undefined
+  constructor(props) {
+    super(props)
+
+    if (localStorage.level === undefined) {
+      localStorage.level = 0
+    }
+
+    this.state = {
+      windowSize: Math.min(window.innerWidth, window.innerHeight),
+      size: game.size,
+      board: game.board[localStorage.level],
+      queue: [],
+      changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
+      generation: undefined,
+      loopCount: undefined
+    }
   }
 
   onDropletClick = (row, col) => {
@@ -69,8 +80,8 @@ export default class Board extends Component {
         return
       }
       
-      this.setState({board, queue, changed, generation: maxGeneration - generationCount, loopCount: 2 - loopCount})
-      setTimeout(loop.bind(this, maxGeneration, loopCount, generationCount - 1, onDone), 500)
+      this.setState({board, queue, changed, generation: maxGeneration - generationCount, loopCount: loopNum - loopCount})
+      setTimeout(loop.bind(this, maxGeneration, loopCount, generationCount - 1, onDone), 10)
     }
 
     const onDone = () => {
@@ -81,21 +92,20 @@ export default class Board extends Component {
         start()
       } else {
         this.setState({board, queue})
+        if (boardEmpty(this.state.board)) {
+          console.log(`level ${this.state.level} completed`)
+          localStorage.level++
+          window.location = window.location
+        }
       }
     }
 
     const start = () => {
-      loop(5, 2, 5, onDone.bind(this))
+      loop(genNum - 1, loopNum, genNum - 1, onDone.bind(this))
     }
 
     start()
-
-    if (boardEmpty) {
-      console.log("Congrat!")
-    }
   }
-
-  
 
   render() {
     const cellSize = this.state.windowSize / this.state.size
@@ -179,7 +189,7 @@ export default class Board extends Component {
             row={e.row}
             col={e.col}
             direction={e.direction}
-            gen={this.state.generation + this.state.loopCount * 6}
+            gen={this.state.generation + this.state.loopCount * genNum}
             cellSize={cellSize}
           />
         )

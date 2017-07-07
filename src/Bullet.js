@@ -3,7 +3,7 @@ import {Image} from 'react-konva'
 
 import {directions} from './data'
 
-const genNum = 18
+const genNum = 6
 
 export default class Bullet extends Component {
   constructor(props) {
@@ -69,16 +69,15 @@ export default class Bullet extends Component {
         this.y = props.cellSize * (props.row + 1) - props.gen * props.cellSize / genNum
       }
     }
-    console.log(this.x, this.y)
   })
 
   componentWillReceiveProps = this.fly
 
-  componentDidReceiveProps() {
+  componentDidUpdate() {
     this.refs.image.to({
       x: this.x + directions[this.props.direction][0] * this.props.cellSize / genNum,
       y: this.y + directions[this.props.direction][1] * this.props.cellSize / genNum,
-      duration: 5 / 1000 // pause in sec
+      duration: 10 / 1000 // pause in sec
     })
     console.log(this.props.row, this.props.col)
     console.log(this.x + directions[this.props.direction][0] * this.props.cellSize / genNum, this.y + directions[this.props.direction][1] * this.props.cellSize / genNum)
