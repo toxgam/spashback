@@ -31,10 +31,9 @@ export const fly = (board, thisQueue, changed) => {
         }
       }
     }
-
-    return combo
   })
 
   thisQueue.length = 0
   queue.forEach(e => thisQueue.push(e))
+  return combo
 }

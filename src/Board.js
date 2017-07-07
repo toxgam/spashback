@@ -91,7 +91,13 @@ export default class Board extends Component {
         return
       }
       
-      this.setState({board, queue, changed, generation: maxGeneration - generationCount, loopCount: loopNum - loopCount})
+      this.setState({
+        board, 
+        queue, 
+        changed, 
+        generation: maxGeneration - generationCount, 
+        loopCount: loopNum - loopCount
+      })
       setTimeout(loop.bind(this, maxGeneration, loopCount, generationCount - 1, onDone), 10)
     }
 
@@ -133,7 +139,8 @@ export default class Board extends Component {
 
     return (
       <Group>
-        <Text text={"Score: " + this.score} width={displaySize} />
+        <Text text={"Droplet: " + this.score} align="left" padding={10} />
+        <Text text={"Score: " + (this.level + 1)} width={displaySize} align="right" padding={10} />
         <Group x={this.windowSize  * 0.1} y={this.windowSize * 0.1}>
           {array.map(idx =>
             <MyLine key={idx}
