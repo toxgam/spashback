@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Group, Line} from 'react-konva'
+import {Group, Line, Text} from 'react-konva'
 
 import Droplet from './Droplet'
 import Bullet from './Bullet'
@@ -50,15 +50,20 @@ export default class Board extends Component {
     this.level = parseInt(localStorage.level)
     this.score = parseInt(localStorage.score)
 
+    if (this.level > 1) {
+      this.level = 1
+    }
+
     this.state = {
-      windowSize: Math.min(window.innerWidth, window.innerHeight),
-      size: game.size,
       board: game.board[this.level],
       queue: [],
       changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
       generation: undefined,
       loopCount: undefined
     }
+
+    this.size = game.size
+    this.windowSize = Math.min(window.innerWidth, window.innerHeight)
   }
 
   onDropletClick = (row, col) => {
@@ -122,49 +127,34 @@ export default class Board extends Component {
   }
 
   render() {
-    const cellSize = this.state.windowSize / this.state.size
-    const array = [...Array(this.state.size + 1).keys()]
+    const displaySize = this.windowSize * 0.8
+    const cellSize = displaySize / this.size
+    const array = [...Array(this.size + 1).keys()]
 
     return (
       <Group>
-        {array.map(idx =>
-          <MyLine key={idx}
-            points={[0, idx * cellSize, this.state.windowSize, idx * cellSize]}
-            color="black"
-            width={5}
-          />
-        )}
+        <Text text={"Score: " + this.score} width={displaySize} />
+        <Group x={this.windowSize  * 0.1} y={this.windowSize * 0.1}>
+          {array.map(idx =>
+            <MyLine key={idx}
+              points={[0, idx * cellSize, displaySize, idx * cellSize]}
+              color="black"
+              width={5}
+            />
+          )}
 
-        {array.map(idx =>
-          <MyLine key={idx}
-            points={[idx * cellSize, 0, idx * cellSize, this.state.windowSize]}
-            color="black"
-            width={5}
-          />
-        )}
+          {array.map(idx =>
+            <MyLine key={idx}
+              points={[idx * cellSize, 0, idx * cellSize, displaySize]}
+              color="black"
+              width={5}
+            />
+          )}
 
-        {this.renderDroplets(cellSize)}
+          {this.renderDroplets(cellSize)}
 
-        {this.renderBullets(cellSize)}
-
-        {/*<Bullet 
-          //key={`33`}
-          row={3}
-          col={3}
-          direction={0}
-          gen={this.state.generation}
-          cellSize={cellSize}
-        />
-
-          <Bullet
-            //key={`34`}
-            row={3}
-            col={3}
-            direction={1}
-            gen={this.state.generation}
-            cellSize={cellSize}
-          />*/}
-
+          {this.renderBullets(cellSize)}
+        </Group>
       </Group>
     )
   }
@@ -172,8 +162,8 @@ export default class Board extends Component {
   renderDroplets(cellSize) {
     const ret = []
 
-    for (let row = 0; row < this.state.size; row++) {
-      for (let col = 0; col < this.state.size; col++) {
+    for (let row = 0; row < this.size; row++) {
+      for (let col = 0; col < this.size; col++) {
         ret.push(
           <Droplet 
             key={`${row}-${col}`}

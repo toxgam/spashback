@@ -14,9 +14,10 @@ export default class Droplet extends Component {
   }
 
   render() {
-    const size = this.props.cellSize * 9
-    const x = this.props.cellSize * this.props.col + 10
-    const y = this.props.cellSize * this.props.row + 10
+    console.log(this.props.cellSize)
+    const size = this.props.cellSize * (this.props.cellSize / 7.16)
+    const x = this.props.cellSize * this.props.col + this.props.cellSize / 22.67
+    const y = this.props.cellSize * this.props.row + this.props.cellSize / 22.67
 
     return (
       <Image
