@@ -44,7 +44,7 @@ export default class Droplet extends Component {
     const imageObj = new window.Image()
 
     if (nextProps.gen !== undefined) {
-      const dir = this.props.value + "to" + nextProps.value
+      const dir = (nextProps.value + 4) % 5 + "to" + nextProps.value
       imageObj.src = "./" + dir + "/" + nextProps.gen + ".svg"
     } else {
       imageObj.src = "./" + this.props.value + "to" + this.props.value + "/" + 0 + ".svg"

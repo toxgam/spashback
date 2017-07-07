@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {Group, Line} from 'react-konva'
 
 import Droplet from './Droplet'
+import Bullet from './Bullet'
 import {game} from './data'
 import {bublePop, fly} from './move'
 
@@ -41,7 +42,8 @@ export default class Board extends Component {
     board: game.board,
     queue: [],
     changed: Array(game.size).fill('dummy').map(() => Array(game.size).fill(false)),
-    generation: undefined
+    generation: undefined,
+    loopCount: undefined
   }
 
   onDropletClick = (row, col) => {
@@ -67,8 +69,8 @@ export default class Board extends Component {
         return
       }
       
-      this.setState({board, queue, changed, generation: generationCount})
-      setTimeout(loop.bind(this, maxGeneration, loopCount, generationCount - 1, onDone), 5)
+      this.setState({board, queue, changed, generation: maxGeneration - generationCount, loopCount: 2 - loopCount})
+      setTimeout(loop.bind(this, maxGeneration, loopCount, generationCount - 1, onDone), 500)
     }
 
     const onDone = () => {
@@ -77,6 +79,8 @@ export default class Board extends Component {
 
       if (queue.length > 0 && !noChange(changed)) {
         start()
+      } else {
+        this.setState({board, queue})
       }
     }
 
@@ -85,6 +89,10 @@ export default class Board extends Component {
     }
 
     start()
+
+    if (boardEmpty) {
+      console.log("Congrat!")
+    }
   }
 
   
@@ -113,6 +121,26 @@ export default class Board extends Component {
 
         {this.renderDroplets(cellSize)}
 
+        {this.renderBullets(cellSize)}
+
+        {/*<Bullet 
+          //key={`33`}
+          row={3}
+          col={3}
+          direction={0}
+          gen={this.state.generation}
+          cellSize={cellSize}
+        />
+
+          <Bullet
+            //key={`34`}
+            row={3}
+            col={3}
+            direction={1}
+            gen={this.state.generation}
+            cellSize={cellSize}
+          />*/}
+
       </Group>
     )
   }
@@ -131,6 +159,28 @@ export default class Board extends Component {
             gen={this.state.changed[row][col] ? this.state.generation : undefined}
             cellSize={cellSize}
             onClick={this.onDropletClick.bind(this)}
+          />
+        )
+      }
+    }
+
+    return ret         
+  }
+
+  renderBullets(cellSize) {
+    const ret = []
+
+    for (let i = 0; i < this.state.queue.length; i++) {
+      const e = this.state.queue[i]
+
+      if (!this.state.changed[e.row][e.col]) {
+        ret.push(
+          <Bullet 
+            row={e.row}
+            col={e.col}
+            direction={e.direction}
+            gen={this.state.generation + this.state.loopCount * 6}
+            cellSize={cellSize}
           />
         )
       }
