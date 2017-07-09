@@ -25,7 +25,7 @@ export default class Droplet extends Component {
         y={y}
         width={size}
         height={size}
-        onClick={this.props.onClick.bind(this, this.props.row, this.props.col)}
+        onClick={this.props.onClick ? this.props.onClick.bind(this, this.props.row, this.props.col) : undefined}
       />
     )
   }

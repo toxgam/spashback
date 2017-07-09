@@ -175,7 +175,7 @@ export default class Board extends Component {
             value={this.state.board[row][col]}
             gen={this.state.changed[row][col] ? this.state.generation : undefined}
             cellSize={cellSize}
-            onClick={this.onDropletClick.bind(this)}
+            onClick={this.state.queue.length === 0 ? this.onDropletClick.bind(this) : undefined}
           />
         )
       }

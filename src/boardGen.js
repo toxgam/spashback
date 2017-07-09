@@ -80,5 +80,13 @@ export const gameBoard = ((level, thisMove) => {
     }
   } while (feasible(board, move))
 
+  // return [
+  //   [0, 0, 0, 0, 0], 
+  //   [4, 4, 0, 0, 0], 
+  //   [0, 4, 4, 4, 0], 
+  //   [0, 0, 0, 4, 4], 
+  //   [0, 0, 0, 0, 0]
+  // ]
+
   return board
 })
